@@ -1,11 +1,15 @@
 package com.gestao.pedidos.service;
 
+import com.gestao.pedidos.auth.AuthService;
 import com.gestao.pedidos.dto.request.OrderRequest;
 import com.gestao.pedidos.dto.response.OrderResponse;
 import com.gestao.pedidos.enums.OrderState;
 import com.gestao.pedidos.exeption.OrderNotFoundException;
 import com.gestao.pedidos.model.Order;
+import com.gestao.pedidos.model.OrderStatusHistory;
+import com.gestao.pedidos.model.User;
 import com.gestao.pedidos.repository.OrderRepository;
+import com.gestao.pedidos.repository.OrderStatusHistoryRepository;
 import com.gestao.pedidos.service.mapper.OrderConverter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,17 +23,43 @@ public class OrderService {
 
     private final OrderRepository orderRepository;
     private final ExternalValidationService externalValidationService;
+    private final OrderStatusHistoryRepository statusHistoryRepository;
+    private final AuthService authService;
     private static final Logger LOGGER = LoggerFactory.getLogger(OrderService.class);
 
-    public OrderService(OrderRepository orderRepository) {
+    public OrderService(OrderRepository orderRepository, ExternalValidationService externalValidationService, OrderStatusHistoryRepository statusHistoryRepository, AuthService authService) {
         this.orderRepository = orderRepository;
+        this.externalValidationService = externalValidationService;
+        this.statusHistoryRepository = statusHistoryRepository;
+        this.authService = authService;
     }
 
     public OrderResponse createOrder(OrderRequest orderRequest) {
-        LOGGER.info("Creating order for client: {}", orderRequest.getClientEmail());
-        Order order = OrderConverter.requestToOrder(orderRequest);
 
-        return OrderConverter.orderToResponse(order);
+        try {
+            User user = authService.FindOrCreateUser(orderRequest);
+
+            if (!user.isValidated()) {
+                ExternalValidationService.ValidationResult validationService = externalValidationService.validateClient(user);
+
+                user.setValidated(validationService.isValid());
+            }
+
+            Order order = OrderConverter.requestToOrder(orderRequest);
+            orderRepository.save(order);
+
+            OrderStatusHistory statusHistory = OrderStatusHistory.builder()
+                    .order(order)
+                    .state(order.getState())
+                    .build();
+
+            statusHistoryRepository.save(statusHistory);
+
+            return OrderConverter.orderToResponse(order);
+        } catch (Exception e) {
+            LOGGER.error("Error creating order for client {}: {}", orderRequest.getClientEmail(), e.getMessage());
+            throw new RuntimeException("Failed to create order: " + e.getMessage(), e);
+        }
     }
 
     public OrderResponse getOrderById(Long id) {

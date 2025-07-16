@@ -25,6 +25,9 @@ public class User {
     @Column(name = "password", nullable = false)
     private String password;
 
+    @Column(name = "is_validated", nullable = false)
+    private boolean isValidated;
+
     @Column(name = "token", nullable = false)
     private String token;
 

@@ -2,27 +2,48 @@ package com.gestao.pedidos.auth;
 
 import com.gestao.pedidos.config.JwtService;
 import com.gestao.pedidos.dto.request.LoginRequest;
+import com.gestao.pedidos.dto.request.OrderRequest;
 import com.gestao.pedidos.dto.response.AuthResponse;
 import com.gestao.pedidos.exeption.InvalidTokenException;
 import com.gestao.pedidos.exeption.UserNotFoundException;
 import com.gestao.pedidos.model.User;
 import com.gestao.pedidos.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 @Transactional
 public class AuthService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(AuthService.class);
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
+
 
     public AuthService(UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.jwtService = jwtService;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public User FindOrCreateUser(OrderRequest request) {
+
+        if (!userRepository.existsByEmail(request.getClientEmail())) {
+            LOGGER.info("Creating new user with email: {}", request.getClientEmail());
+            User user = User.builder()
+                    .email(request.getClientEmail())
+                    .name(request.getClientName())
+                    .isValidated(false)
+                    .build();
+            return userRepository.save(user);
+        }
+
+        LOGGER.info("User with email {} already exists", request.getClientEmail());
+        return userRepository.findByEmail(request.getClientEmail())
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -58,7 +79,7 @@ public class AuthService {
 
         String email = jwtService.extractEmail(refreshToken);
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("user not found"));
+                .orElseThrow(() -> new UserNotFoundException("user not found"));
 
         if (!refreshToken.equals(user.getRefreshToken())) {
             throw new InvalidTokenException("invalid refresh token");
