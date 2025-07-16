@@ -22,16 +22,6 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String password;
-
     @Column(name = "is_validated", nullable = false)
     private boolean isValidated;
-
-    @Column(name = "token", nullable = false)
-    private String token;
-
-    @Column(name = "refresh_token", nullable = false)
-    private String refreshToken;
 }
-

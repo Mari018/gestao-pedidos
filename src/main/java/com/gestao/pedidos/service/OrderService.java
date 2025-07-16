@@ -37,7 +37,7 @@ public class OrderService {
     public OrderResponse createOrder(OrderRequest orderRequest) {
 
         try {
-            User user = authService.FindOrCreateUser(orderRequest);
+            User user = authService.findOrCreateUser(orderRequest);
 
             if (!user.isValidated()) {
                 ExternalValidationService.ValidationResult validationService = externalValidationService.validateClient(user);
