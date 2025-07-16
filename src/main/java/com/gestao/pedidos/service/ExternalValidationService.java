@@ -3,6 +3,7 @@ package com.gestao.pedidos.service;
 import com.gestao.pedidos.model.ErrorLog;
 import com.gestao.pedidos.model.User;
 import com.gestao.pedidos.repository.ErrorLogRepository;
+import lombok.Data;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +13,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+@Data
 @Service
 public class ExternalValidationService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ExternalValidationService.class);
@@ -20,16 +22,14 @@ public class ExternalValidationService {
     private final ErrorLogRepository errorLogRepository;
 
    @Value("${external.validation.api.url}")
-    private final String apiUrl;
+    private String apiUrl;
 
     @Value("${external.validation.api.timeout:5000}")
-    private final int timeoutMs;
+    private int timeoutMs;
 
-    public ExternalValidationService(WebClient webClient, ErrorLogRepository errorLogRepository, String apiUrl, int timeoutMs) {
+    public ExternalValidationService(WebClient webClient, ErrorLogRepository errorLogRepository) {
         this.webClient = webClient;
         this.errorLogRepository = errorLogRepository;
-        this.apiUrl = apiUrl;
-        this.timeoutMs = timeoutMs;
     }
 
     public ValidationResult validateClient(User user) {

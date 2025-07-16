@@ -38,9 +38,6 @@ public class Order {
     @Column(name = "value", nullable = false)
     private float value;
 
-    @Column(name = "created_at", nullable = false)
-    private LocalDateTime createdAt;
-
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
@@ -49,8 +46,8 @@ public class Order {
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+
         if (creationDate == null) {
             creationDate = LocalDateTime.now();
         }

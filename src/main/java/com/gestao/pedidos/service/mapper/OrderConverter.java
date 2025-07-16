@@ -4,7 +4,7 @@ import com.gestao.pedidos.dto.request.OrderRequest;
 import com.gestao.pedidos.dto.response.OrderResponse;
 import com.gestao.pedidos.model.Order;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class OrderConverter {
 
@@ -13,7 +13,7 @@ public class OrderConverter {
         return Order.builder()
                 .clientName(request.getClientName())
                 .clientEmail(request.getClientEmail())
-                .creationDate(LocalDate.now())
+                .creationDate(LocalDateTime.now())
                 .value(request.getValue())
                 .build();
     }

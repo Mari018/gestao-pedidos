@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -38,7 +39,7 @@ public class OrderController {
     }
 
     @GetMapping(path = "/date")
-    public ResponseEntity<List<OrderResponse>> listForDate(@RequestParam LocalDate date) {
+    public ResponseEntity<List<OrderResponse>> listForDate(@RequestParam LocalDateTime date) {
         List<OrderResponse> orderResponses = orderService.listForDate(date);
         return ResponseEntity.ok(orderResponses);
     }

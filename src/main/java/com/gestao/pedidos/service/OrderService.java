@@ -17,7 +17,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -97,8 +96,8 @@ public class OrderService {
                 .toList();
     }
 
-    public List<OrderResponse> listForDate(LocalDate date) {
-        List<Order> orders = orderRepository.findAllByDate(date);
+    public List<OrderResponse> listForDate(LocalDateTime date) {
+        List<Order> orders = orderRepository.findAllByCreationDate(date);
 
         return orders.stream()
                 .map(OrderConverter::orderToResponse)
