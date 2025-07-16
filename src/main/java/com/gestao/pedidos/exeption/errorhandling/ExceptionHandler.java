@@ -18,7 +18,8 @@ import java.util.Map;
 public class ExceptionHandler {
     @org.springframework.web.bind.annotation.ExceptionHandler(value = {
             OrderNotFoundException.class,
-            UserNotFoundException.class
+            UserNotFoundException.class,
+            RuntimeException.class
     }
     )
     public ResponseEntity<Error> handleNotFound(Exception e, HttpServletRequest request) {
